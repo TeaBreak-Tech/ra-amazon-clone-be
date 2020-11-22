@@ -37,3 +37,5 @@ urlpatterns = [
 ```
 [GET].../good?gid=3
 ```
+
+

@@ -215,8 +215,6 @@ def category(request):
         category.save()
         return JsonResponse({"status":"success","category_id":category_id},status=201)
 
-
-
 def good_label(request):
     if request.method == 'GET':
         good_labels = list(Good_Label.objects.values("label")) 
@@ -236,17 +234,19 @@ def user(request):
         if not identity:
             # 不提供identity的用于已登录用户确认登录状态
             try:
+                print("Finding User...",user_id)
                 user = User.objects.get(pk=user_id)
                 tokens = user.token.split(' ')
+                print("User found")
                 if token in tokens:
                     #如果token可用，继续使用
                     response = JsonResponse({
                         "user_id":user.user_id,
                         "user_name":user.user_name,
                     })
-                    response.set_cookie("user_id",user.user_id,secure=True)
+                    response.set_cookie("user_id",user.user_id)#,secure=True)
                     response.set_cookie("user_name",user.user_name)
-                    response.set_cookie("token",token,secure=True)
+                    response.set_cookie("token",token)#,secure=True)
                     return response
                 elif password==user.password:
                     # 如果token已经不可用，但是提供了有效的密码，则新增一个token来使用
@@ -257,9 +257,9 @@ def user(request):
                     })
                     user.token = ' '.join(user.topen.split(' ').append(token))
                     user.save()
-                    response.set_cookie("user_id",user.user_id,secure=True)
+                    response.set_cookie("user_id",user.user_id)#,secure=True)
                     response.set_cookie("user_name",user.user_name)
-                    response.set_cookie("token",token,secure=True)
+                    response.set_cookie("token",token)#,secure=True)
                     return response
                 else:
                     #如果也没提供有效密码，则视为强制下线，交由前端处理
@@ -272,16 +272,16 @@ def user(request):
                     return response
             except:
                 # 为RA研究专门准备的接口，在不提供identity而且用户不存在的时候自动创建用户
-                user = User()
-                user.user_name = "Research-User"
-                user.password = "Research-Password"
-                user.token = token_urlsafe(TOKEN_LENGTH)
-                user.save()
-                response = HttpResponse({"user_id":user.user_id},status=201)
-                response.set_cookie("user_id",user.user_id,secure=True)
-                response.set_cookie("user_name",user.user_name)
-                response.set_cookie("token",token,secure=True)
-                return response
+                #user = User()
+                #user.user_name = "Research-User"
+                #user.password = "Research-Password"
+                #user.token = token_urlsafe(TOKEN_LENGTH)
+                #user.save()
+                #response = HttpResponse({"user_id":user.user_id},status=201)
+                #response.set_cookie("user_id",user.user_id)#,secure=True)
+                #response.set_cookie("user_name",user.user_name)
+                #response.set_cookie("token",token)#,secure=True)
+                return U_DNE#response
         # 提供了identity的话，忽视以上逻辑
         else:
             # 未登陆状态，使用用户名或id + 密码 进行登录
@@ -305,7 +305,13 @@ def user(request):
                 # 成功登录
                 if token not in user.token.split(' '):
                     token = token_urlsafe(TOKEN_LENGTH)
-                    user.token = ' '.join(user.topen.split(' ').append(token))
+                    tokens = user.token
+                    print(tokens)
+                    tokens = str(tokens).split()
+                    print(tokens)
+                    tokens.append(token)
+                    print(tokens)
+                    user.token = ' '.join(tokens)
                     user.save()
                 response = JsonResponse({
                     "user_id":user.user_id,
@@ -339,7 +345,6 @@ def user(request):
             return JsonResponse(result)
     else:
         return HttpResponseNotAllowed(["POST","GET","PATCH","DELETE"])
-
 
 def cart(request):
     token = request.COOKIES.get("token")
@@ -447,6 +452,21 @@ def order(request):
             order.save()
         order_group.save()
 
-
+def event(request):
+    if request.method == 'POST':
+        body_dict = json.loads(request.body.decode('utf-8'))
+        label = body_dict.get("label")
+        extra = json.dumps(body_dict.get("extra",{}))
+        user_id = body_dict.get("user_id")
+        try: user = User.objects.get(pk=user_id)
+        except: return U_DNE
+        event = Event()
+        event.label = label
+        event.extra = extra
+        event.user = user
+        event.save()
+        return HttpResponse("success")
+    else:
+        return HttpResponseNotAllowed(["POST"])
     
     

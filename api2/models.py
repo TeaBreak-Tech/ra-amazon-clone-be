@@ -59,3 +59,10 @@ class Order_Group(models.Model):
     finished_time = models.DateTimeField(null=True)
     extra = models.TextField(null=True)
     cost = models.DecimalField(null=True, decimal_places=2, max_digits=20)
+
+class Event(models.Model):
+    event_id = models.AutoField(primary_key=True)
+    time = models.DateTimeField(auto_now=True)
+    label = models.CharField(max_length=20,null=True)
+    extra = models.TextField(null=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, db_column="user")
