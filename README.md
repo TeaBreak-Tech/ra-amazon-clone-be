@@ -28,3 +28,12 @@ urlpatterns = [
 几个接口的设计直接对应数据模型的几个Model,
 一切的操作都可以使用HTTP动词（GET，POST等）以及参数（?key=value）来进行明确
 这简化了前后端对接成本。
+
+比如，获取全部的商品：
+```
+[GET].../good?list_all=true
+```
+而要获取某个具体商品的详细信息：
+```
+[GET].../good?gid=3
+```
