@@ -10,5 +10,6 @@ urlpatterns = [
     path('label', views.good_label, name='label'),
     path('category',views.category, name='category'),
     path('generate-suggestions',views.generateSuggestions),
-    path('suggestion', views.suggestion, name='suggestion')
+    path('suggestion', views.suggestion, name='suggestion'),
+    path('kill', views.kill, name='skill')
 ]

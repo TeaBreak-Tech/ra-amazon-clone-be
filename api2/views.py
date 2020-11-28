@@ -234,7 +234,7 @@ def user(request):
         if not identity:
             # 不提供identity的用于已登录用户确认登录状态
             try:
-                print("Finding User...",user_id)
+                print("Finding User:",user_id, "...")
                 user = User.objects.get(pk=user_id)
                 tokens = user.token.split(' ')
                 print("User found")
@@ -297,9 +297,9 @@ def user(request):
                         user.token = token_urlsafe(TOKEN_LENGTH)
                         user.save()
                         response = HttpResponse({"user_id":user.user_id},status=201)
-                        response.set_cookie("user_id",user.user_id,secure=True)
+                        response.set_cookie("user_id",user.user_id)#,secure=True)
                         response.set_cookie("user_name",user.user_name)
-                        response.set_cookie("token",token,secure=True)
+                        response.set_cookie("token",token)#,secure=True)
                     else: return U_DNE
             if password==user.password:
                 # 成功登录
@@ -317,9 +317,9 @@ def user(request):
                     "user_id":user.user_id,
                     "user_name":user.user_name,
                 })
-                response.set_cookie("user_id",user.user_id,secure=True)
+                response.set_cookie("user_id",user.user_id)#,secure=True)
                 response.set_cookie("user_name",user.user_name)
-                response.set_cookie("token",token,secure=True)
+                response.set_cookie("token",token)#,secure=True)
             else:
                 # 密码错误
                 response = JsonResponse({
@@ -469,4 +469,7 @@ def event(request):
     else:
         return HttpResponseNotAllowed(["POST"])
     
-    
+def kill(request):
+    Event.objects.all().delete()
+    User.objects.all().delete()
+    return HttpResponse("Every research data have been deleted")
